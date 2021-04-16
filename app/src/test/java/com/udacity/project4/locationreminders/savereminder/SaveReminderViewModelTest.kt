@@ -134,4 +134,18 @@ class SaveReminderViewModelTest {
         assertThat(viewModel.reminderSelectedLocationStr.getOrAwaitValue(), `is`(location))
 
     }
+
+    @Test
+    fun showLoading_showLoadingChangeState() = runBlocking {
+        val reminder = ReminderDataItem("Title", "Description", "location", 5.1, 5.2)
+        // The loading animation appeared
+        mainCoroutineRule.pauseDispatcher()
+
+        viewModel.validateAndSaveReminder(reminder)
+        assertThat(viewModel.showLoading.getOrAwaitValue(), `is`(true))
+
+        // The loading animation disappeared
+        mainCoroutineRule.resumeDispatcher()
+        assertThat(viewModel.showLoading.getOrAwaitValue(), `is`(false))
+    }
 }

@@ -5,6 +5,7 @@ import androidx.arch.core.executor.testing.InstantTaskExecutorRule
 import com.udacity.project4.locationreminders.MainCoroutineRule
 import com.udacity.project4.locationreminders.data.FakeDataSource
 import com.udacity.project4.locationreminders.data.dto.ReminderDTO
+import com.udacity.project4.locationreminders.getOrAwaitValue
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.runBlocking
 import org.hamcrest.CoreMatchers.`is`
@@ -12,6 +13,7 @@ import org.junit.Before
 import org.junit.Rule
 import org.junit.Test
 import org.hamcrest.MatcherAssert.assertThat
+import org.hamcrest.Matchers
 
 @ExperimentalCoroutinesApi
 class RemindersListViewModelTest {
@@ -55,5 +57,21 @@ class RemindersListViewModelTest {
         assertThat(reminder.latitude, `is`(5.1))
 
         fakeSource.deleteAllReminders()
+    }
+
+
+    @Test
+    fun showLoading_showLoadingChangeState() = runBlocking {
+        val reminder = ReminderDTO("Title", "Description", "location", 5.1, 5.2)
+        // The loading animation appeared
+        fakeSource.saveReminder(reminder)
+        mainCoroutineRule.pauseDispatcher()
+
+        viewModel.loadReminders()
+        assertThat(viewModel.showLoading.getOrAwaitValue(), Matchers.`is`(true))
+
+        // The loading animation disappeared
+        mainCoroutineRule.resumeDispatcher()
+        assertThat(viewModel.showLoading.getOrAwaitValue(), Matchers.`is`(false))
     }
 }
